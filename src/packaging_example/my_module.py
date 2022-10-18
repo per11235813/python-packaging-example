@@ -8,3 +8,6 @@ def fib(n):
 def hello():
     print("hello, world!")
 
+def hello2():
+    print("hello, world!")
+
