@@ -1,4 +1,5 @@
 import pytest
+
 from packaging_example.my_module import fib
 
 test_data = [

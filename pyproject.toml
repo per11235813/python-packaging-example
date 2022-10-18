@@ -19,6 +19,11 @@ dependencies = [
 [tool.black]
 line-length = 122
 
+[tool.isort]
+
+line_length = 122
+profile = "black"
+
 [project.optional-dependencies]
 dev = [
     "typer",
@@ -32,6 +37,7 @@ dev = [
     "ipykernel",
     "pre-commit",
     "nbmake",
+    "isort",
 ]
 
 [tool.setuptools]

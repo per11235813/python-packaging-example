@@ -1,5 +1,5 @@
-from importlib.resources import files
 import csv
+from importlib.resources import files
 
 
 def test_csv_data():
