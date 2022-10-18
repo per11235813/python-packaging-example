@@ -32,3 +32,7 @@ pip install -e .[dev] --config-settings editable_mode=compat
     *  pip install -U  git+https://github.com/per11235813/python-packaging-examples-setuptools.git
 * Specific version (by tag)
     * pip install -U  git+https://github.com/per11235813/python-packaging-examples-setuptools.git@v0.0.2
+
+## Testing notebooks
+* `(ls -recurse notebooks\*.ipynb).fullname | ForEach-Object { pytest --nbmake $_ }`
+* `pytest --nbmake **/*ipynb`

@@ -30,7 +30,8 @@ dev = [
     "wheel",
     "ipython",
     "ipykernel",
-    "pre-commit"
+    "pre-commit",
+    "nbmake",
 ]
 
 [tool.setuptools]

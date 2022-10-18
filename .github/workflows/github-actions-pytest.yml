@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,3 +29,6 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+      - name: Test notebooks with pytest
+        run: |
+          pytest --nbmake **/*.ipynb
