@@ -1,4 +1,4 @@
-# Example to test python packaging
+## Example to test python packaging
 
 In particular the objective is to clarify how to get editable install working with setuptools and the VS Code tool set
 
@@ -25,3 +25,9 @@ pip install -e .[dev]
 ```
 pip install -e .[dev] --config-settings editable_mode=compat
 ```
+
+## Install packages directly from git 
+* Latest:
+    *  pip install -U  git+https://github.com/per11235813/python-packaging-examples-setuptools.git
+* Specific version (by tag)
+    * pip install -U  git+https://github.com/per11235813/python-packaging-examples-setuptools.git@v0.0.2
