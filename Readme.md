@@ -9,11 +9,12 @@ py -3.10 -m venv venv
 python -m pip  install -U pip build
 python -m build --wheel
 
+# Inspect wheel content
 7z l .\dist\packaging_example-0.0.1-py3-none-any.whl
 ```
 
 * Editable install, this works for
-    * src layout and flat layout with setuptools==63.4.3
+    * src layout and flat layout with setuptools==63.4.3. Empty setup.cfg is required for 63.4.3
     * src layout with with setuptools==66.5
 ```
 pip install -e .[dev]
@@ -26,7 +27,7 @@ pip install -e .[dev]
 pip install -e .[dev] --config-settings editable_mode=compat
 ```
 
-## Install packages directly from git 
+## Install packages directly from git
 * Latest:
     *  pip install -U  git+https://github.com/per11235813/python-packaging-examples-setuptools.git
 * Specific version (by tag)
