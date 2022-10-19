@@ -13,7 +13,6 @@ description = "python packaging examples"
 requires-python = ">=3.9"
 
 dependencies = [
-  "pydantic",
 ]
 
 [tool.black]
@@ -26,18 +25,16 @@ profile = "black"
 
 [project.optional-dependencies]
 dev = [
-    "typer",
-    "rich",
-    "pytest",
     "flake8",
     "black",
+    "isort",
     "build",
     "wheel",
+    "pytest",
     "ipython",
     "ipykernel",
     "pre-commit",
     "nbmake",
-    "isort",
 ]
 
 [tool.setuptools]

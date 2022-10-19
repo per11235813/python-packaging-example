@@ -13,19 +13,14 @@ python -m build --wheel
 7z l .\dist\packaging_example-0.0.1-py3-none-any.whl
 ```
 
-* Editable install, this works for
+* Editable install with `pip install -e .[dev]` works for
     * src layout and flat layout with setuptools==63.4.3. Empty setup.cfg is required for 63.4.3
     * src layout with with setuptools==66.5
-```
-pip install -e .[dev]
-```
 
-* Editable install, this works for
+* Editable install with `pip install -e .[dev] --config-settings editable_mode=compat` works for
     * flat layout with with setuptools==66.5
     * info here: https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#editable-install-modules-not-found
-```
-pip install -e .[dev] --config-settings editable_mode=compat
-```
+
 
 ## Install packages directly from git
 * Latest:
@@ -35,8 +30,12 @@ pip install -e .[dev] --config-settings editable_mode=compat
 
 
 ## Run pre-commit hooks
-`pre-commit run --all-files`
+* `pre-commit run --all-files`
+* `pre-commit install`
+* `pre-commit uninstall`
 
-## Testing notebooks
-* `(ls -recurse notebooks\*.ipynb).fullname | ForEach-Object { pytest --nbmake $_ }`
-* `pytest --nbmake **/*ipynb`
+## Testing all notebooks
+* powershell:
+    * `(ls -recurse notebooks\*.ipynb).fullname | ForEach-Object { pytest --nbmake $_ }`
+* bash (github actions)
+    * `pytest --nbmake **/*ipynb`
