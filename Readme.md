@@ -15,10 +15,10 @@ python -m build --wheel
 
 * Editable install with `pip install -e .[dev]` works for
     * src layout and flat layout with setuptools==63.4.3. Empty setup.cfg is required for 63.4.3
-    * src layout with with setuptools==66.5
+    * src layout with with setuptools==65.5
 
 * Editable install with `pip install -e .[dev] --config-settings editable_mode=compat` works for
-    * flat layout with with setuptools==66.5
+    * flat layout with with setuptools==65.5
     * info here: https://github.com/microsoft/pylance-release/blob/main/TROUBLESHOOTING.md#editable-install-modules-not-found
 
 
