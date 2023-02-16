@@ -9,4 +9,8 @@ def hello():
 
 
 def hello2():
-    print("hello, world!")
+    print(f"hello, world! {fib(14)=}")
+
+
+if __name__ == "__main__":
+    hello2()

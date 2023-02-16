@@ -19,7 +19,6 @@ dependencies = [
 line-length = 122
 
 [tool.isort]
-
 line_length = 122
 profile = "black"
 
@@ -35,7 +34,12 @@ dev = [
     "ipykernel",
     "pre-commit",
     "nbmake",
+    "pyinstaller",
 ]
+
+[project.scripts]
+hello2 = "packaging_example.my_module:hello2"
+hello1 = "packaging_example.my_module:hello1"
 
 [tool.setuptools]
 include-package-data = true
