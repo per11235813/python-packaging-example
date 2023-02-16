@@ -1,3 +1,7 @@
+from importlib.resources import files
+from pathlib import Path
+
+
 def fib(n):
     if n < 2:
         return n
@@ -5,7 +9,12 @@ def fib(n):
 
 
 def hello():
-    print("hello, world!")
+    print("hello, world!"),
+
+    print("\nData collected from the package with importlib.resources:")
+    csv_path: Path = files("packaging_example.data") / "data.csv"
+    csv_text = csv_path.read_text()
+    print(csv_text)
 
 
 def hello2():

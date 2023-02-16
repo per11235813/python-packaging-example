@@ -13,17 +13,23 @@ def venv():
 
     if not Path("venv").exists():
         run(f"{py_exe} -m venv venv")
-        shutil.copy("pip.ini", "venv")
+        # shutil.copy("pip.ini", "venv")
 
     run(rf".\venv\Scripts\activate.bat & python -m pip install -U pip")
     run(rf".\venv\Scripts\activate.bat & pip install -e .[dev]")
+
+
+@cli_add("build")
+def build():
+    """Build wheel"""
+    run(r".\venv\Scripts\activate.bat & python -m build --wheel")
 
 
 @cli_add("build-exe")
 def build_exe():
     """build the project"""
 
-    cmd = rf""".\{venv}\Scripts\activate.bat & pyinstaller.exe pyinstaller_main.py 
+    cmd = r""".\venv\Scripts\activate.bat & pyinstaller.exe pyinstaller_main.py 
                     --name packaging-example
                     --noconfirm --console --clean --onefile
                     --collect-data "packaging_example.data" 
@@ -38,6 +44,7 @@ def clean():
     """Cleanup build artifacts"""
     shutil.rmtree("dist", ignore_errors=True)
     shutil.rmtree("build", ignore_errors=True)
+    Path("packaging-example.spec").unlink(missing_ok=True)
 
     for d in Path(".").glob("**/*.egg-info"):
         shutil.rmtree(d)
