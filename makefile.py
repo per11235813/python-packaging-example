@@ -49,6 +49,9 @@ def clean():
     for d in Path(".").glob("**/*.egg-info"):
         shutil.rmtree(d)
 
+    for d in Path(".").glob("**/__pycache__"):
+        shutil.rmtree(d)
+
 
 @cli_add("clean-all")
 def clean_all():
