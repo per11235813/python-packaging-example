@@ -33,7 +33,7 @@ def cli_exec():
     _cli_dict[sys.argv[1]]()
 
 
-def run(cmd, echo_cmd=True, echo_stdout=True, cwd=None) -> str:
+def run(cmd: str, echo_cmd=True, echo_stdout=True, cwd: Path=None) -> str:
     """Run shell command with option to print stdout incrementally"""
     echo_cmd and print(f"##\n## Running: {cmd}\n")
     res = []

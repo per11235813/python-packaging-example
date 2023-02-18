@@ -25,7 +25,7 @@ def venv():
 @cli_add("build")
 def build():
     """Build wheel"""
-    run(r".\venv\Scripts\activate.bat & python -m build --wheel")
+    run(r".\venv\Scripts\activate.bat & python -m build --wheel --no-isolation")
 
 
 @cli_add("build-exe")

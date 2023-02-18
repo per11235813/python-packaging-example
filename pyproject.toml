@@ -35,6 +35,7 @@ dev = [
     "pre-commit",
     "nbmake",
     "pyinstaller",
+    "setuptools==67.2",
 ]
 
 [project.scripts]
