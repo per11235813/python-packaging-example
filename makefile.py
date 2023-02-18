@@ -5,9 +5,9 @@ from pathlib import Path
 
 from makefileutils import cli_add, cli_exec, run, get_pyproject_data, is_git_clean, is_git_tag_used
 
-DIST_FOLDER: Path("dist")
+DIST_FOLDER = Path("dist")
 DIST_TARGET = Path("dist-target")
-DIST_TARGET.mkdir(exist_ok=True)
+DIST_TARGET.mkdir(exist_ok=True) # tmp folder for deployment
 
 @cli_add("venv")
 def venv():
