@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 from subprocess import PIPE, CalledProcessError, Popen
 
@@ -46,3 +47,41 @@ def run(cmd, echo_cmd=True, echo_stdout=True, cwd=None) -> str:
         raise CalledProcessError(proc.returncode, cmd)
 
     return "".join(res)
+
+
+def is_git_clean() -> bool:
+    run("git fetch")
+    git_status = run("git status", echo_stdout=False)
+
+    index_clean = "nothing to commit, working tree clean" in git_status
+    branch_up_to_date = "Your branch is up to date with 'origin/" in git_status
+
+    return branch_up_to_date and index_clean
+
+
+def is_git_tag_used(tag: str) -> bool:
+    git_tag_l = run("git tag -l")
+
+    return tag in git_tag_l
+
+
+project_version, project_name = str, str
+
+
+def get_pyproject_data(pyproject_toml: Path = Path("pyproject.toml")) -> tuple[project_version, project_name]:
+    import tomli
+
+    pyproject_toml = tomli.loads(pyproject_toml.read_text(encoding="utf8"))
+
+    version = pyproject_toml["project"]["version"]
+    package_name = pyproject_toml["project"]["name"]
+
+    return version, package_name
+
+
+def check_git():
+    """Check if index and cache is clean"""
+    msg = "Index is clean" if is_git_clean(echo_stdout=False) else "Index is dirty"
+    cwd = Path.cwd()
+
+    print(f"{cwd.absolute()}: {msg}")

@@ -1,6 +1,7 @@
 venv
 build
 dist
+dist-target
 __pycache__
 *.egg-info
 *.whl
