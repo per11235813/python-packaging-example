@@ -32,11 +32,11 @@ def build():
 def build_exe():
     """Build exe file"""
 
-    cmd = r""".\venv\Scripts\activate.bat & pyinstaller.exe
-                pyinstaller_main.py 
+    cmd = r"""
+        .\venv\Scripts\activate.bat & pyinstaller.exe pyinstaller_main.py 
                 --name packaging-example
-                --noconfirm --console --clean --onefile
                 --collect-data "packaging_example.data" 
+                --noconfirm --console --clean --onefile
     """
 
     cmd = re.sub(r"\s+", " ", cmd)

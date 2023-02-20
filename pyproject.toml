@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "packaging_example"
-version = "0.0.6"
+version = "0.0.7"
 
 authors = [
   { name="Per Stoffer Jensen", email="perstofferjensen@gmail.com" },
@@ -34,6 +34,7 @@ dev = [
     "ipykernel",
     "pre-commit",
     "nbmake",
+    "pandas",
     "pyinstaller",
     "setuptools==67.2",
 ]

@@ -5,6 +5,6 @@ dist-target
 __pycache__
 *.egg-info
 *.whl
-tmp*.py
-tmp*.ipynb
+tmp*
 *.spec
+words
