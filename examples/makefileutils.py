@@ -1,6 +1,7 @@
 from pathlib import Path
 import sys
 from subprocess import PIPE, CalledProcessError, Popen
+from collections import namedtuple
 
 _cli_dict = {}
 
@@ -65,23 +66,19 @@ def is_git_tag_used(tag: str) -> bool:
     return tag in git_tag_l
 
 
-project_version, project_name = str, str
-
-
-def get_pyproject_data(pyproject_toml: Path = Path("pyproject.toml")) -> tuple[project_version, project_name]:
+pyproject_toml_data = namedtuple("pyproject_toml_data", (project_version, project_name))
+def get_pyproject_data(pyproject_toml: Path = Path("pyproject.toml")) -> pyproject_toml_data:
     import tomli
 
     pyproject_toml = tomli.loads(pyproject_toml.read_text(encoding="utf8"))
-
     version = pyproject_toml["project"]["version"]
     package_name = pyproject_toml["project"]["name"]
 
-    return version, package_name
+    return pyproject_toml_data(version, package_name)
 
 
 def check_git():
     """Check if index and cache is clean"""
     msg = "Index is clean" if is_git_clean(echo_stdout=False) else "Index is dirty"
-    cwd = Path.cwd()
 
-    print(f"{cwd.absolute()}: {msg}")
+    print(f"{Path.cwd.absolute()}: {msg}")

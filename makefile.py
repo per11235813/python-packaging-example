@@ -1,76 +1,73 @@
 import re
 import shutil
+from subprocess import Popen, PIPE, CalledProcessError
 import sys
 from pathlib import Path
+from itertools import chain
 
-from makefileutils import cli_add, cli_exec, run, get_pyproject_data, is_git_clean, is_git_tag_used
 
-DIST_FOLDER = Path("dist")
-DIST_TARGET = Path("dist-target")
-DIST_TARGET.mkdir(exist_ok=True) # tmp folder for deployment
+venv_name = "venv"
+activate = rf".\{venv_name}\Scripts\activate.bat & "
+wheelhouse_folder = r"\\md-man.biz\project-cph\bwcph\wheelhouse_3_10"
+pip_ini = Path(venv_name) / "pip.ini"
+pip_ini_txt = f"[install]\nno-index = true\nfind-links = {wheelhouse_folder}"
+py_exe = sys.executable
 
-@cli_add("venv")
+
 def venv():
     """Create or update venv"""
-    py_exe = sys.executable
 
-    if not Path("venv").exists():
-        run(f"{py_exe} -m venv venv")
-        # shutil.copy("pip.ini", "venv")
+    if Path(venv_name).exists():
+        print("venv exists, exiting")
+        return
 
-    run(rf".\venv\Scripts\activate.bat & python -m pip install -U pip")
-    run(rf".\venv\Scripts\activate.bat & pip install -e .[dev]")
+    run(f"{py_exe} -m venv {venv_name}")
+    pip_ini.write_text(pip_ini_txt)
+    run(f"{activate} python -m pip install -U pip")
+    run(f"{activate} python -m pip install -e .[dev]")
 
 
-@cli_add("build")
 def build():
-    """Build wheel"""
-    run(r".\venv\Scripts\activate.bat & python -m build --wheel --no-isolation")
+    """Re-build wheel"""
+    run(f"{activate} python -m build --wheel --no-isolation")
 
 
-@cli_add("build-exe")
 def build_exe():
     """Build exe file"""
-
-    cmd = r"""
-        .\venv\Scripts\activate.bat & pyinstaller.exe pyinstaller_main.py 
+    cmd = f"""
+        {activate} pyinstaller.exe pyinstaller_main.py 
                 --name packaging-example
                 --collect-data "packaging_example.data" 
                 --noconfirm --console --clean --onefile
     """
-
     cmd = re.sub(r"\s+", " ", cmd)
     run(cmd)
 
 
-@cli_add("test")
 def pytest():
     """Run the tests"""
-    run(r"pytest")
+    run("pytest")
 
 
-@cli_add("clean")
 def clean():
     """Cleanup build artifacts"""
-    shutil.rmtree("dist", ignore_errors=True)
-    shutil.rmtree("build", ignore_errors=True)
-    Path("packaging-example.spec").unlink(missing_ok=True)
+    src = Path("src")
+    to_remove = chain(
+        ("dist", "build", "packaging-example.spec"),
+        src.glob("**/__pycache__"),
+        src.glob("**/*.egg-info"),
+    )
 
-    for d in Path(".").glob("**/*.egg-info"):
-        shutil.rmtree(d)
-
-    for d in Path(".").glob("**/__pycache__"):
-        shutil.rmtree(d)
+    for d in to_remove:
+        rm(d)
 
 
-@cli_add("clean-all")
 def clean_all():
     """Cleanup build artifacts and venv"""
     clean()
-    shutil.rmtree("venv", ignore_errors=True)
+    rm("venv")
 
 
-@cli_add("nbclean-all")
 def nbclean_all():
     """Remove output from all notebooks"""
     all_notebooks = (nb for nb in Path.cwd().glob("*.ipynb") if ".ipynb_checkpoints" not in nb.parts)
@@ -78,34 +75,55 @@ def nbclean_all():
         run(f'jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace "{nb}"')
 
 
-@cli_add("dist")
-def dist():
-    """Tags current commit and deploy build artifacts"""
+actions = {
+    "venv": venv,
+    "build": build,
+    "pytest": pytest,
+    "clean": clean,
+    "nbclean-all": nbclean_all,
+    "clean-all": clean_all,
+}
 
-    name, version, git_tag = check_git()
-    build()
-    run(f'git tag -a {git_tag} -m "version {version} of {name}"')
-    run(f"git push --follow-tags")
-
-    for wheel in DIST_FOLDER.glob("*.whl"):
-        print(f"Copy {wheel} to {DIST_TARGET}")
-        shutil.copy(wheel, DIST_TARGET)
+####################################
+#####  Boilerplate starts here
+####################################
 
 
-def check_git() -> tuple[str, str, str]:
-    if not is_git_clean():
-        print("Git index is dirty. Exiting ...", file=sys.stderr)
-        sys.exit(1)
+def run(cmd: str, echo_cmd=True, echo_stdout=True, cwd: Path = None) -> str:
+    """Run shell command with option to print stdout incrementally"""
+    echo_cmd and print(f"##\n## Running: {cmd}\n")
+    res = []
+    proc = Popen(cmd, stdout=PIPE, stderr=sys.stderr, shell=True, encoding=sys.getfilesystemencoding(), cwd=cwd)
+    while proc.poll() is None:
+        line = proc.stdout.readline()
+        echo_stdout and print(line, end="")
+        res.append(line)
 
-    version, name = get_pyproject_data()
-    git_tag = f"v{version}"
+    if proc.returncode != 0:
+        raise CalledProcessError(proc.returncode, cmd)
 
-    if is_git_tag_used(git_tag):
-        print(f"Git tag: {git_tag} is already used. Update ersion in pyproject.toml. Exiting ...", file=sys.stderr)
-        sys.exit(1)
+    return "".join(res)
 
-    return name, version, git_tag
+
+def rm(path: Path | str, echo_cmd: bool = True):
+    """Remove file or folder"""
+    if isinstance(path, str):
+        path = Path(path)
+    echo_cmd and print(f"## Removing: {path}")
+    if path.is_file():
+        path.unlink()
+    elif path.is_dir():
+        shutil.rmtree(path)
 
 
 if __name__ == "__main__":
-    cli_exec()
+    cmd = sys.argv[0]
+    sub_cmd = sys.argv[1] if len(sys.argv) == 2 else None
+
+    if sub_cmd in actions and sub_cmd:
+        actions[sub_cmd]()
+    else:
+        print(f"Options for '{sys.executable} {cmd}':")
+        for arg, func in actions.items():
+            doc_str = func.__doc__.split("\n")[0] if func.__doc__ else ""
+            print(f"   {arg: <18}{doc_str}")
