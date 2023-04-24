@@ -2,7 +2,9 @@ venv
 build
 dist
 dist-target
+.pytest_cache
 __pycache__
+.vscode
 *.egg-info
 *.whl
 tmp*
