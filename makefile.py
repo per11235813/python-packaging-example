@@ -1,10 +1,11 @@
+import datetime as dt
 import re
 import shutil
-from subprocess import Popen, PIPE, CalledProcessError
 import sys
-from pathlib import Path
+import tempfile
 from itertools import chain
-
+from pathlib import Path
+from subprocess import PIPE, CalledProcessError, Popen
 
 venv_name = "venv"
 activate = rf".\{venv_name}\Scripts\activate.bat & "
@@ -49,6 +50,26 @@ def pytest():
     run("pytest")
 
 
+def clean_test():
+    tmp_dir = Path(tempfile.gettempdir())
+    now_str = dt.datetime.now().strftime("%Y%m%d_%H%M")
+    checkout_folder = tmp_dir / f"{Path.cwd().name}-{now_str}"
+    git_url = get_url_from_git_config()
+
+    try:
+        run(f"git clone {git_url} {checkout_folder.name}", cwd=tmp_dir)
+        run(f"py -3.10 makefile.py venv", cwd=checkout_folder)
+        run(f"py -3.10 makefile.py pytest", cwd=checkout_folder)
+        status = "OK"
+    except CalledProcessError:
+        status = "NOK"
+
+    run(f'git tag -a TEST_{status}_{now_str} -m "Test run {now_str} - {status}"', cwd=checkout_folder)
+    run(f"git push --follow-tags", cwd=checkout_folder)
+
+    rm(checkout_folder)
+
+
 def clean():
     """Cleanup build artifacts"""
     src = Path("src")
@@ -79,6 +100,7 @@ actions = {
     "venv": venv,
     "build": build,
     "pytest": pytest,
+    "clean-test": clean_test,
     "clean": clean,
     "nbclean-all": nbclean_all,
     "clean-all": clean_all,
@@ -89,9 +111,21 @@ actions = {
 ####################################
 
 
+def get_url_from_git_config(conf: Path = Path.cwd() / ".git" / "config") -> str:
+    """Get the url from the git config file"""
+    lines = conf.read_text().splitlines()
+    urls = [line.split(" = ")[1].strip() for line in lines if line.startswith("\turl = ")]
+    assert len(urls) == 1, "More than one url found in git config"
+
+    return urls[0]
+
+
 def run(cmd: str, echo_cmd=True, echo_stdout=True, cwd: Path = None) -> str:
     """Run shell command with option to print stdout incrementally"""
-    echo_cmd and print(f"##\n## Running: {cmd}\n")
+    echo_cmd and print(f"##\n## Running: {cmd}", end="")
+    cwd and print(f"\n## cwd: {cwd}")
+    echo_cmd and print(f"\n")
+
     res = []
     proc = Popen(cmd, stdout=PIPE, stderr=sys.stderr, shell=True, encoding=sys.getfilesystemencoding(), cwd=cwd)
     while proc.poll() is None:
