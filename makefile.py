@@ -8,7 +8,7 @@ from pathlib import Path
 from subprocess import PIPE, CalledProcessError, Popen
 
 venv_name = "venv"
-activate = rf".\{venv_name}\Scripts\activate.bat & "
+activate = rf".\{venv_name}\Scripts\activate.bat && "
 wheelhouse_folder = r"\\md-man.biz\project-cph\bwcph\wheelhouse_3_10"
 pip_ini = Path(venv_name) / "pip.ini"
 pip_ini_txt = f"[install]\nno-index = true\nfind-links = {wheelhouse_folder}"
@@ -24,25 +24,25 @@ def venv():
 
     run(f"{py_exe} -m venv {venv_name}")
     pip_ini.write_text(pip_ini_txt)
-    run(f"{activate} python -m pip install -U pip")
-    run(f"{activate} python -m pip install -e .[dev]")
+    run(f"python -m pip install -U pip", activate_venv=True)
+    run(f"python -m pip install -e .[dev]", activate_venv=True)
 
 
 def build():
     """Re-build wheel"""
-    run(f"{activate} python -m build --wheel --no-isolation")
+    run(f"python -m build --wheel --no-isolation", activate_venv=True)
 
 
 def build_exe():
     """Build exe file"""
     cmd = f"""
-        {activate} pyinstaller.exe pyinstaller_main.py 
+        pyinstaller.exe pyinstaller_main.py 
                 --name packaging-example
                 --collect-data "packaging_example.data" 
                 --noconfirm --console --clean --onefile
     """
     cmd = re.sub(r"\s+", " ", cmd)
-    run(cmd)
+    run(cmd, activate_venv=True)
 
 
 def pytest():
@@ -120,18 +120,20 @@ def get_url_from_git_config(conf: Path = Path.cwd() / ".git" / "config") -> str:
     return urls[0]
 
 
-def run(cmd: str, echo_cmd=True, echo_stdout=True, cwd: Path = None) -> str:
+def run(cmd: str, echo_cmd=True, echo_stdout=True, cwd: Path = None, activate_venv: bool = False) -> str:
     """Run shell command with option to print stdout incrementally"""
+    if activate_venv:
+        cmd = f"{activate} {cmd}"
+
     echo_cmd and print(f"##\n## Running: {cmd}", end="")
     cwd and print(f"\n## cwd: {cwd}")
     echo_cmd and print(f"\n")
 
     res = []
-    proc = Popen(cmd, stdout=PIPE, stderr=sys.stderr, shell=True, encoding=sys.getfilesystemencoding(), cwd=cwd)
-    while proc.poll() is None:
-        line = proc.stdout.readline()
-        echo_stdout and print(line, end="")
-        res.append(line)
+    with Popen(cmd, stdout=PIPE, stderr=sys.stderr, shell=True, encoding=sys.getfilesystemencoding(), cwd=cwd) as proc:
+        for line in proc.stdout:
+            echo_stdout and print(line, end="", flush=True)
+            res.append(line)
 
     if proc.returncode != 0:
         raise CalledProcessError(proc.returncode, cmd)
