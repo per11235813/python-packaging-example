@@ -20,6 +20,10 @@ def hello():
 def hello2():
     print(f"hello, world! {fib(14)=}")
 
+def hello3():
+    print(f"hello, world! {fib(16)=}")
+
 
 if __name__ == "__main__":
     hello2()
+    hello3()

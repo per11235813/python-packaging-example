@@ -11,3 +11,7 @@ tmp*
 *.spec
 words
 .vscode/launch.json
+p2k.py
+test_log.txt
+.gitignore
+test/parameterize_test.py

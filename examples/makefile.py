@@ -116,5 +116,7 @@ def check_git() -> tuple[str, str, str]:
     return name, version, git_tag
 
 
+
+
 if __name__ == "__main__":
     cli_exec()

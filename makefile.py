@@ -74,7 +74,7 @@ def clean():
     """Cleanup build artifacts"""
     src = Path("src")
     to_remove = chain(
-        ("dist", "build", "packaging-example.spec"),
+        ("dist", "build", "pytest_cache", "__pycache__"),
         src.glob("**/__pycache__"),
         src.glob("**/*.egg-info"),
     )
@@ -106,6 +106,7 @@ actions = {
     "clean-all": clean_all,
 }
 
+
 ####################################
 #####  Boilerplate starts here
 ####################################
@@ -122,6 +123,34 @@ def get_url_from_git_config(conf: Path = Path.cwd() / ".git" / "config") -> str:
 
 def run(cmd: str, echo_cmd=True, echo_stdout=True, cwd: Path = None) -> str:
     """Run shell command with option to print stdout incrementally"""
+    echo_cmd and print(f"##\n## Running: {cmd}", end="")
+    cwd and print(f"\n## cwd: {cwd}")
+    echo_cmd and print(f"\n")
+
+    res = []
+    proc = Popen(cmd, stdout=PIPE, stderr=sys.stderr, shell=True, encoding=sys.getfilesystemencoding(), cwd=cwd)
+    while proc.poll() is None:
+        line = proc.stdout.readline()
+        echo_stdout and print(line, end="")
+        res.append(line)
+
+    if proc.returncode != 0:
+        raise CalledProcessError(proc.returncode, cmd)
+
+    return "".join(res)
+
+
+def run(
+    cmd: str,
+    echo_cmd=True,
+    echo_stdout=True,
+    cwd: Path = None,
+    venv_activate: str | None = rf".\venv\Scripts\activate.bat && ",
+) -> str:
+    """Run shell command with option to print stdout incrementally"""
+    if venv_activate:
+        cmd = venv_activate + cmd
+
     echo_cmd and print(f"##\n## Running: {cmd}", end="")
     cwd and print(f"\n## cwd: {cwd}")
     echo_cmd and print(f"\n")
