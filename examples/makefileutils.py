@@ -66,7 +66,7 @@ def is_git_tag_used(tag: str) -> bool:
     return tag in git_tag_l
 
 
-pyproject_toml_data = namedtuple("pyproject_toml_data", (project_version, project_name))
+pyproject_toml_data = namedtuple("pyproject_toml_data", ("project_version", "project_name"))
 def get_pyproject_data(pyproject_toml: Path = Path("pyproject.toml")) -> pyproject_toml_data:
     import tomli
 
