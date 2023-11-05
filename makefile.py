@@ -1,3 +1,4 @@
+from __future__ import annotations
 import datetime as dt
 import re
 import shutil
@@ -7,7 +8,8 @@ from itertools import chain
 from pathlib import Path
 from subprocess import PIPE, CalledProcessError, Popen
 
-venv_name = "venv"
+
+venv_name = "venv310"
 activate = rf".\{venv_name}\Scripts\activate.bat & "
 wheelhouse_folder = r"\\md-man.biz\project-cph\bwcph\wheelhouse_3_10"
 pip_ini = Path(venv_name) / "pip.ini"
@@ -22,26 +24,29 @@ def venv():
         print("venv exists, exiting")
         return
 
-    run(f"{py_exe} -m venv {venv_name}")
+    run(f"{py_exe} -m venv {venv_name}", venv_activate=None)
     pip_ini.write_text(pip_ini_txt)
-    run(f"{activate} python -m pip install -U pip")
-    run(f"{activate} python -m pip install -e .[dev]")
+    run(f"python -m pip install -U pip")
+    run(f"python -m pip install -e .[dev]")
 
 
 def build():
     """Re-build wheel"""
-    run(f"{activate} python -m build --wheel --no-isolation")
+    run(f"python -m build --wheel --no-isolation")
 
 
 def build_exe():
     """Build exe file"""
     cmd = f"""
-        {activate} pyinstaller.exe pyinstaller_main.py 
+        pyinstaller.exe pyinstaller_main.py 
                 --name packaging-example
                 --collect-data "packaging_example.data" 
                 --noconfirm --console --clean --onefile
     """
     cmd = re.sub(r"\s+", " ", cmd)
+    dist_folder = Path("dist")
+    if dist_folder.exists():
+        rm(dist_folder)
     run(cmd)
 
 
@@ -127,7 +132,7 @@ def run(
     echo_cmd=True,
     echo_stdout=True,
     cwd: Path | None = None,
-    venv_activate: str | None = rf".\venv\Scripts\activate.bat && ",
+    venv_activate: str | None = rf".\{venv_name}\Scripts\activate.bat && ",
 ) -> str:
     """Run shell command with option to print stdout incrementally"""
     if venv_activate:

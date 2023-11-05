@@ -15,12 +15,6 @@ requires-python = ">=3.9"
 dependencies = [
 ]
 
-[tool.black]
-line-length = 122
-
-[tool.isort]
-line_length = 122
-profile = "black"
 
 [project.optional-dependencies]
 dev = [
@@ -47,8 +41,17 @@ hello1 = "packaging_example.my_module:hello"
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.package-data]
-"*" = ["*.csv"]
-
 [tool.setuptools.packages.find]
 where = ["src"]
+#include = ["packaging_example"] 
+
+[tool.setuptools.package-data]
+"*" = ["*.csv"]
+#"packaging_example" = ["**/*.json", "**/*.xlsx", "**/*.png", "**/*.csv"]
+
+[tool.black]
+line-length = 122
+
+[tool.isort]
+line_length = 122
+profile = "black"
