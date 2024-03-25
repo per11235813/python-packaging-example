@@ -5,6 +5,7 @@ from pathlib import Path
 from packaging_example import my_module
 
 if __name__ == "__main__":
+    my_module.export_pic()
     my_module.hello2()
 
     print("\nData collected from the package with importlib.resources:")

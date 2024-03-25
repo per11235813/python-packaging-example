@@ -16,18 +16,29 @@ pip_ini = Path(venv_name) / "pip.ini"
 pip_ini_txt = f"[install]\nno-index = true\nfind-links = {wheelhouse_folder}"
 py_exe = sys.executable
 
+venv_name_build = "venv310b"
+venv_build_activate_path = Path(venv_name_build).absolute() / "Scripts" / "activate.bat"
+venv_build_activate = f'"{venv_build_activate_path}" && '
+pip_ini_build = Path(venv_name_build) / "pip.ini"
 
 def venv():
     """Create or update venv"""
 
     if Path(venv_name).exists():
         print("venv exists, exiting")
-        return
+    else:
+        run(f"{py_exe} -m venv {venv_name}", venv_activate=None)
+        pip_ini.write_text(pip_ini_txt)
+        run(f"python -m pip install -U pip")
+        run(f"python -m pip install -e .[dev]")
 
-    run(f"{py_exe} -m venv {venv_name}", venv_activate=None)
-    pip_ini.write_text(pip_ini_txt)
-    run(f"python -m pip install -U pip")
-    run(f"python -m pip install -e .[dev]")
+    if Path(venv_name_build).exists():
+        print("venv exists, exiting")
+    else:
+        run(f"{py_exe} -m venv {venv_name_build}", venv_activate=None)
+        pip_ini_build.write_text(pip_ini_txt)
+        run(f"python -m pip install -U pip", venv_activate=venv_build_activate)
+        run(f"python -m pip install .", venv_activate=venv_build_activate)
 
 
 def build():
@@ -37,6 +48,8 @@ def build():
 
 def build_exe():
     """Build exe file"""
+    clean()
+    # single file build
     cmd = f"""
         pyinstaller.exe pyinstaller_main.py 
                 --name packaging-example
@@ -44,10 +57,36 @@ def build_exe():
                 --noconfirm --console --clean --onefile
     """
     cmd = re.sub(r"\s+", " ", cmd)
-    dist_folder = Path("dist")
-    if dist_folder.exists():
-        rm(dist_folder)
     run(cmd)
+
+    # multifile build to inspect what datafiles are included - everything in packaging_example.data 
+    cmd = f"""
+        pyinstaller.exe pyinstaller_main.py 
+                --name packaging-example-non-single
+                --collect-data "packaging_example.data" 
+                --noconfirm --console --clean
+    """
+    cmd = re.sub(r"\s+", " ", cmd)
+
+    run(cmd)
+
+
+    # multifile build where the package is installed, now the installer and the wheel are in sync
+    cmd = rf"""
+        pyinstaller.exe ..\pyinstaller_main.py 
+                --name packaging-example-non-single-dedicated-venv
+                --collect-data "packaging_example.data" 
+                --noconfirm --console --clean --distpath ..\dist
+    """
+    cmd = re.sub(r"\s+", " ", cmd)
+
+    tmp_dir = Path("tmp")
+    tmp_dir.mkdir(exist_ok=True)
+    run(f"python -m pip install -U .", venv_activate=venv_build_activate)
+    run(cmd, venv_activate=venv_build_activate, cwd=tmp_dir)
+
+
+
 
 
 def pytest():

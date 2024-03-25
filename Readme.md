@@ -12,6 +12,8 @@ This project demonstrates
 * Use of pyinstaller to build an exe file, `packaging-example.exe` 
 * If the package is installed with `pipx install .\packaging_example-0.0.3-py3-none-any.whl` you can run hello1.exe and hello2.exe
 * Basic use of github action to run tests and build wheels
+* pyinstaller does uses `--collect-data` and `--collect-binaries` to include data files and executables. So `--collect-data` also includes binary data
+* pyinstaller does not consider include/exclude patterns in pyproject.toml. To ensure the pyinstaller includes exactly the data in the generated wheel, then a decidated venv should be created for the build
 
 ### Build wheel and test wheel content
 * Setup venv with editable install (only dependant on stdlib)

@@ -15,3 +15,5 @@ p2k.py
 test_log.txt
 .gitignore
 test/parameterize_test.py
+pic*.png
+tmp
