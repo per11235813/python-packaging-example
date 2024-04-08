@@ -1,4 +1,8 @@
 """
+
+info on compatibility tags
+    https://packaging.python.org/en/latest/specifications/platform-compatibility-tags/
+
 * python tag
     * cp26,
     * cp27,
